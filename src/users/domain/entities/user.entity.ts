@@ -41,7 +41,7 @@ export class UserEntity extends Entity<UserProps> {
   }
 
   private set password(value: string) {
-    this.props.name = value
+    this.props.password = value
   }
 
   get createdAt() {
