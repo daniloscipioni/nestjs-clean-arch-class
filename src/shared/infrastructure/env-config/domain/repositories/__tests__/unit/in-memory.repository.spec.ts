@@ -53,7 +53,7 @@ describe('InMemoryRepository unit tests', () => {
       { name: 'updated', price: 10 },
       entity._id,
     )
-    const result = await sut.update(entityUpdated)
+    await sut.update(entityUpdated)
     expect(entityUpdated.toJson()).toStrictEqual(sut.items[0].toJson())
   })
 })
