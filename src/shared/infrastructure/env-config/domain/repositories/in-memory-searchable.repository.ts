@@ -49,7 +49,6 @@ export abstract class InMemorySearchableRepository<E extends Entity>
     if (!sort || !this.sortableFields.includes(sort)) {
       return items
     }
-
     // Sort por padrão altera o valor do arrays
     // com spread operator [...items] mantem o array original
     return [...items].sort((a, b) => {
@@ -68,6 +67,9 @@ export abstract class InMemorySearchableRepository<E extends Entity>
     page: SearchParams['page'],
     perPage: SearchParams['perPage'],
   ): Promise<E[]> {
-    return
+    const start = (page - 1) * perPage
+    const limit = start + perPage
+
+    return items.slice(start, limit)
   }
 }
