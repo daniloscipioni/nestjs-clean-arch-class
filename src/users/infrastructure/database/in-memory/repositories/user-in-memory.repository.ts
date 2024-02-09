@@ -11,6 +11,7 @@ export class UserInMemoryRepository
   implements UserRepository.Repository
 {
   sortableFields: string[] = ['name', 'createdAt']
+
   async findByEmail(email: string): Promise<UserEntity> {
     const entity = this.items.find(item => item.email === email)
     if (!entity) {
@@ -18,6 +19,7 @@ export class UserInMemoryRepository
     }
     return entity
   }
+
   async emailExists(email: string): Promise<void> {
     const entity = this.items.find(item => item.email === email)
     if (entity) {

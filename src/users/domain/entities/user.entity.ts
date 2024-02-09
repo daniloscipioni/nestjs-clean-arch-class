@@ -4,7 +4,7 @@ import {
   UserValidatorFactory,
 } from '../validators/users.validator'
 import { Validator } from 'class-validator'
-import { EntityValidationError } from '@/shared/infrastructure/env-config/domain/entities/errors/validation-error'
+import { EntityValidationError } from '@/shared/infrastructure/env-config/domain/errors/validation-error'
 
 export type UserProps = {
   name: string
