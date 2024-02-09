@@ -46,7 +46,7 @@ export class UserInMemoryRepository
     sortDir: SortDirection | null,
   ): Promise<UserEntity[]> {
     return !sort
-      ? super.applySort(items, 'cratedAt', 'desc')
+      ? super.applySort(items, 'createdAt', 'desc')
       : super.applySort(items, sort, sortDir)
   }
 }
