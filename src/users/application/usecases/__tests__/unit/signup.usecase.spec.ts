@@ -6,7 +6,7 @@ import { UserDataBuilder } from '@/users/domain/entities/testing/helpers/user-da
 import { ConflictError } from '@/shared/infrastructure/env-config/domain/errors/conflict-error'
 import { BadRequestError } from '../../../errors/bad-request-error'
 
-describe('UserInMemoryRepository unit tests', () => {
+describe('SignupUseCase unit tests', () => {
   let sut: SignupUseCase.UseCase
   let repository: UserInMemoryRepository
   let hashProvider: HashProvider
