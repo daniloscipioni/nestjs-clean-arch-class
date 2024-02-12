@@ -1,10 +1,10 @@
 import { UserInMemoryRepository } from '@/users/infrastructure/database/in-memory/repositories/user-in-memory.repository'
-import { SignupUseCase } from './signup.usecase'
+import { SignupUseCase } from '../../signup.usecase'
 import { HashProvider } from '@/shared/application/providers/hash-provider'
 import { BcryptjsHashProvider } from '@/users/infrastructure/providers/hash-provider/bcryptjs-hash.provider'
 import { UserDataBuilder } from '@/users/domain/entities/testing/helpers/user-data-builder'
 import { ConflictError } from '@/shared/infrastructure/env-config/domain/errors/conflict-error'
-import { BadRequestError } from '../errors/bad-request-error'
+import { BadRequestError } from '../../../errors/bad-request-error'
 
 describe('UserInMemoryRepository unit tests', () => {
   let sut: SignupUseCase.UseCase
