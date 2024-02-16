@@ -36,17 +36,21 @@ describe('SigninUseCase unit tests', () => {
   })
   it('Should throws error when email not provide', async () => {
     const props = { email: null, password: '1234' }
-    expect(() => sut.execute(props)).rejects.toBeInstanceOf(BadRequestError)
+    await expect(() => sut.execute(props)).rejects.toBeInstanceOf(
+      BadRequestError,
+    )
   })
 
   it('Should throws error when password not provide', async () => {
     const props = { email: 'a@a.com', password: null }
-    expect(() => sut.execute(props)).rejects.toBeInstanceOf(BadRequestError)
+    await expect(() => sut.execute(props)).rejects.toBeInstanceOf(
+      BadRequestError,
+    )
   })
 
   it('Should not be able to authenticate with wrong email', async () => {
     const props = { email: 'a@a.com', password: '1234' }
-    expect(() => sut.execute(props)).rejects.toBeInstanceOf(NotFoundError)
+    await expect(() => sut.execute(props)).rejects.toBeInstanceOf(NotFoundError)
   })
 
   it('Should not be able to authenticate with wrong password', async () => {
@@ -55,8 +59,8 @@ describe('SigninUseCase unit tests', () => {
       UserDataBuilder({ email: 'a@a.com', password: hashPassword }),
     )
     repository.items = [entity]
-    const props = { email: 'a@a.com', password: '1234' }
-    expect(() => sut.execute(props)).rejects.toBeInstanceOf(
+    const props = { email: 'a@a.com', password: 'fake' }
+    await expect(() => sut.execute(props)).rejects.toBeInstanceOf(
       InvalidCredentialsError,
     )
   })
