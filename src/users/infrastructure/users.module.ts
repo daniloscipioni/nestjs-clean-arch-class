@@ -14,9 +14,11 @@ import UpdatePasswordUseCase from '../application/usecases/update-password.useca
 import DeleteUserUseCase from '../application/usecases/delete-user.usecase copy'
 
 @Module({
+  // Registrando os usecases criados no módule
   controllers: [UsersController],
   providers: [
     UsersService,
+    // Registrando usecases com dependencias
     {
       provide: 'UserRepository',
       useClass: UserInMemoryRepository,
