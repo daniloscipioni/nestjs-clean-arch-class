@@ -9,3 +9,15 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id        String   @id @db.Uuid
+  name      String   @db.VarChar(255)
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(100)
+  createdAt DateTime @default(now())
+
+  // O nome da tabela será users ao invés de User, se não tiver o @@map é usado o nome do model como nome da tabela
+  // Comando para gerar a tipagem -> npx prisma generate --schema ./src/shared/infrastructure/database/prisma/schema.prisma
+  @@map("users")
+}
