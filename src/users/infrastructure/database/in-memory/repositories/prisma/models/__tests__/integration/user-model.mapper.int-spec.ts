@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process'
 import { UserModelMapper } from '../../user-model.mapper'
 import { ValidationError } from '@/shared/infrastructure/env-config/domain/errors/validation-error'
 import { PrismaClient, User } from '@prisma/client'
