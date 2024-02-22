@@ -7,6 +7,7 @@ import { NotFoundError } from '@/shared/infrastructure/env-config/domain/errors/
 import { UserEntity } from '@/users/domain/entities/user.entity'
 import { UserDataBuilder } from '@/users/domain/entities/testing/helpers/user-data-builder'
 import { UserRepository } from '@/users/domain/repositories/user.repository'
+import { en } from '@faker-js/faker'
 
 describe('UserPrismaRepository integration tests', () => {
   const prismaService = new PrismaClient()
@@ -64,6 +65,26 @@ describe('UserPrismaRepository integration tests', () => {
     expect(JSON.stringify(entities)).toBe(JSON.stringify([entity]))
     //
     entities.map(item => expect(item.toJson()).toStrictEqual(entity.toJson()))
+  })
+
+  it('should throws error on update when an entity not found', async () => {
+    const entity = new UserEntity(UserDataBuilder({}))
+    expect(() => sut.update(entity)).rejects.toThrow(
+      new NotFoundError(`UserModel not found using ID ${entity._id}`),
+    )
+  })
+
+  it('should update an entity', async () => {
+    const entity = new UserEntity(UserDataBuilder({}))
+    const newUser = await prismaService.user.create({ data: entity.toJson() })
+    entity.update('new name')
+    await sut.update(entity)
+
+    const output = await prismaService.user.findUnique({
+      where: { id: entity._id },
+    })
+
+    expect(output.name).toBe('new name')
   })
 
   describe('Search method tests', () => {
