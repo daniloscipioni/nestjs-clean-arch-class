@@ -61,4 +61,55 @@ describe('ListUsersUseCase integration tests', () => {
       lastPage: 1,
     })
   })
+
+  it('should returns output using filter, sort and paginate', async () => {
+    const createdAt = new Date()
+    const entities: UserEntity[] = []
+    const arrange = ['test', 'a', 'TEST', 'b', 'TeSt']
+
+    arrange.forEach((element, index) => {
+      entities.push(
+        new UserEntity({
+          ...UserDataBuilder({ name: element }),
+          createdAt: new Date(createdAt.getTime() + index),
+        }),
+      )
+    })
+
+    await prismaService.user.createMany({
+      data: entities.map(item => item.toJson()),
+    })
+
+    let output = await sut.execute({
+      page: 1,
+      perPage: 2,
+      sort: 'name',
+      sortDir: 'asc',
+      filter: 'TEST',
+    })
+
+    expect(output).toMatchObject({
+      items: [entities[0].toJson(), entities[4].toJson()],
+      total: 3,
+      currentPage: 1,
+      perPage: 2,
+      lastPage: 2,
+    })
+
+    output = await sut.execute({
+      page: 2,
+      perPage: 2,
+      sort: 'name',
+      sortDir: 'asc',
+      filter: 'TEST',
+    })
+
+    expect(output).toMatchObject({
+      items: [entities[2].toJson()],
+      total: 3,
+      currentPage: 2,
+      perPage: 2,
+      lastPage: 2,
+    })
+  })
 })
