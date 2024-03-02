@@ -3,7 +3,6 @@ import { setupPrismaTests } from '@/shared/infrastructure/database/prisma/testin
 import { UserPrismaRepository } from '@/users/infrastructure/database/in-memory/repositories/prisma/repositories/user-prisma.repository'
 import { Test, TestingModule } from '@nestjs/testing'
 import { PrismaClient } from '@prisma/client'
-import { NotFoundError } from '@/shared/infrastructure/env-config/domain/errors/not-found-error'
 import { UserEntity } from '@/users/domain/entities/user.entity'
 import { UserDataBuilder } from '@/users/domain/entities/testing/helpers/user-data-builder'
 import ListUsersUseCase from '../../listusers.usecase'
