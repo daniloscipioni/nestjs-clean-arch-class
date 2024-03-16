@@ -11,6 +11,9 @@ import request from 'supertest'
 import { UsersController } from '../../users.controller'
 import { instanceToPlain } from 'class-transformer'
 import { applyGlobalConfig } from '@/global-config'
+import { UserEntity } from '@/users/domain/entities/user.entity'
+import { UserDataBuilder } from '@/users/domain/entities/testing/helpers/user-data-builder'
+import { log } from 'console'
 
 describe('UsersController unit tests', () => {
   let app: INestApplication
@@ -132,6 +135,16 @@ describe('UsersController unit tests', () => {
       expect(res.body.error).toBe('Unprocessable Entity')
       // Para comparar array e objetos tem que ser o toEqual
       expect(res.body.message).toEqual(['property xpto should not exist'])
+    })
+
+    it('should return error with 409 code when the email is duplicated', async () => {
+      const entity = new UserEntity(UserDataBuilder({ ...signupDto }))
+      await repository.insert(entity)
+      const res = await request(app.getHttpServer())
+        .post('/users')
+        .send(signupDto)
+        .expect(409)
+      console.log(res.body)
     })
   })
 })
