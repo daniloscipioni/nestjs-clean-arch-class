@@ -1,9 +1,5 @@
 import { Entity } from '@/shared/infrastructure/env-config/domain/entities/entity'
-import {
-  UserValidator,
-  UserValidatorFactory,
-} from '../validators/users.validator'
-import { Validator } from 'class-validator'
+import { UserValidatorFactory } from '../validators/users.validator'
 import { EntityValidationError } from '@/shared/infrastructure/env-config/domain/errors/validation-error'
 
 export type UserProps = {
