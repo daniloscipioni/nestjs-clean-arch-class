@@ -25,15 +25,11 @@ describe('ConflictErrorFilter (e2e)', () => {
     await app.init()
   })
 
-  afterAll(async () => {
-    await module.close()
-  })
-
   it('should catch a ConflictError', () => {
-    return request(app.getHttpServer()).get('/url').expect(409).expect({
+    return request(app.getHttpServer()).get('/stub').expect(409).expect({
       status: 409,
       error: 'Conflict',
-      message: 'Email address already used',
+      message: 'Conflicting data',
     })
   })
 })
