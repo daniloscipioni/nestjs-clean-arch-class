@@ -43,13 +43,13 @@ describe('UsersController e2e tests', () => {
     it('should return the users sorted by createdAt', async () => {
       const createdAt = new Date()
       const entities: UserEntity[] = []
-      const arrange = Array(3).fill(UserDataBuilder({}))
+      const arrange = ['test', 'a', 'TEST', 'b', 'TeSt']
       arrange.forEach((element, index) => {
         entities.push(
           new UserEntity({
-            ...element,
+            ...UserDataBuilder({}),
+            name: element,
             email: `a${index}@a.com`,
-            createdAt: new Date(createdAt.getTime() + index),
           }),
         )
       })
@@ -58,7 +58,13 @@ describe('UsersController e2e tests', () => {
         data: entities.map(item => item.toJson()),
       })
 
-      const searchParams = {}
+      const searchParams = {
+        page: 1,
+        perPage: 2,
+        sort: 'name',
+        sortDir: 'asc',
+        filter: 'TEST',
+      }
       const queryParams = new URLSearchParams(searchParams as any).toString()
 
       const res = await request(app.getHttpServer())
@@ -67,10 +73,10 @@ describe('UsersController e2e tests', () => {
 
       expect(Object.keys(res.body)).toStrictEqual(['data', 'meta'])
       expect(res.body).toStrictEqual({
-        data: [...entities]
-          .reverse()
-          .map(item => instanceToPlain(UsersController.userToResponse(item))),
-        meta: { total: 3, currentPage: 1, perPage: 15, lastPage: 1 },
+        data: [entities[0], entities[4].toJson()].map(item =>
+          instanceToPlain(UsersController.userToResponse(item)),
+        ),
+        meta: { total: 3, currentPage: 1, perPage: 2, lastPage: 2 },
       })
     })
 
