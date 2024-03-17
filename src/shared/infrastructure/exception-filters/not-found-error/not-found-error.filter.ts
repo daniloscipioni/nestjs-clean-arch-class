@@ -1,0 +1,16 @@
+import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common'
+import { NotFoundError } from '../../env-config/domain/errors/not-found-error'
+import { FastifyReply } from 'fastify'
+
+@Catch(NotFoundError)
+export class NotFoundErrorFilter<T> implements ExceptionFilter {
+  catch(exception: NotFoundError, host: ArgumentsHost) {
+    const ctx = host.switchToHttp()
+    const response = ctx.getResponse<FastifyReply>()
+    response.status(404).send({
+      status: 404,
+      error: 'NotFound',
+      message: exception.message,
+    })
+  }
+}
