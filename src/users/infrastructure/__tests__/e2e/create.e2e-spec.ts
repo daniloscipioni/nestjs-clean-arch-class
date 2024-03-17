@@ -13,7 +13,6 @@ import { instanceToPlain } from 'class-transformer'
 import { applyGlobalConfig } from '@/global-config'
 import { UserEntity } from '@/users/domain/entities/user.entity'
 import { UserDataBuilder } from '@/users/domain/entities/testing/helpers/user-data-builder'
-import { log } from 'console'
 
 describe('UsersController unit tests', () => {
   let app: INestApplication
