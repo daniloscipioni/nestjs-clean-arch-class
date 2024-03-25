@@ -1,24 +1,25 @@
 import { UserRepository } from '@/users/domain/repositories/user.repository'
 import { INestApplication } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
-import { SignupDto } from '../../dto/signup.dto'
 import { PrismaClient } from '@prisma/client'
 import { setupPrismaTests } from '@/shared/infrastructure/database/prisma/testing/setup-prisma-tests'
 import { EnvConfigModule } from '@/shared/infrastructure/env-config/env-config.module'
 import { UsersModule } from '../../users.module'
 import { DatabaseModule } from '@/shared/infrastructure/database/database.module'
 import request from 'supertest'
-import { UsersController } from '../../users.controller'
-import { instanceToPlain } from 'class-transformer'
 import { applyGlobalConfig } from '@/global-config'
 import { UserEntity } from '@/users/domain/entities/user.entity'
 import { UserDataBuilder } from '@/users/domain/entities/testing/helpers/user-data-builder'
+import { HashProvider } from '@/shared/application/providers/hash-provider'
+import { SigninDto } from '../../dto/signin.dto'
+import { BcryptjsHashProvider } from '../../providers/hash-provider/bcryptjs-hash.provider'
 
 describe('UsersController e2e tests', () => {
   let app: INestApplication
   let module: TestingModule
   let repository: UserRepository.Repository
-  let signupDto: SignupDto
+  let signinDto: SigninDto
+  let hashProvider: HashProvider
   const prismaService = new PrismaClient()
 
   beforeAll(async () => {
@@ -34,44 +35,45 @@ describe('UsersController e2e tests', () => {
     applyGlobalConfig(app)
     await app.init()
     repository = module.get<UserRepository.Repository>('UserRepository')
+    hashProvider = new BcryptjsHashProvider()
   })
 
   beforeEach(async () => {
-    signupDto = {
-      name: 'test name',
+    signinDto = {
       email: 'a@a.com',
       password: 'TestPassword123',
     }
     await prismaService.user.deleteMany()
   })
 
-  describe('POST /users', () => {
-    it('should create a user', async () => {
+  describe('POST /users/login', () => {
+    it('should authenticate a user', async () => {
+      const passwordHash = await hashProvider.generateHash(signinDto.password)
+      const entity = new UserEntity({
+        ...UserDataBuilder({}),
+        email: signinDto.email,
+        password: passwordHash,
+      })
+
+      await repository.insert(entity)
       const res = await request(app.getHttpServer())
-        .post('/users')
-        .send(signupDto)
-        .expect(201)
+        .post('/users/login')
+        .send(signinDto)
+        .expect(200)
 
-      expect(Object.keys(res.body)).toStrictEqual(['data'])
-
-      const user = await repository.findById(res.body.data.id)
-      const presenter = UsersController.userToResponse(user.toJson())
-      const serialized = instanceToPlain(presenter)
-
-      expect(res.body.data).toStrictEqual(serialized)
+      expect(Object.keys(res.body)).toStrictEqual(['accessToken'])
+      expect(typeof res.body.accessToken).toStrictEqual('string')
     })
 
     it('should return error with 422 code when the request body is invalid', async () => {
       const res = await request(app.getHttpServer())
-        .post('/users')
+        .post('/users/login')
         .send({})
         .expect(422)
 
       expect(res.body.error).toBe('Unprocessable Entity')
       // Para comparar array e objetos tem que ser o toEqual
       expect(res.body.message).toEqual([
-        'name should not be empty',
-        'name must be a string',
         'email must be an email',
         'email should not be empty',
         'email must be a string',
@@ -81,25 +83,10 @@ describe('UsersController e2e tests', () => {
     })
 
     it('should return error with 422 code when the name field is invalid', async () => {
-      delete signupDto.name
+      delete signinDto.email
       const res = await request(app.getHttpServer())
-        .post('/users')
-        .send(signupDto)
-        .expect(422)
-
-      expect(res.body.error).toBe('Unprocessable Entity')
-      // Para comparar array e objetos tem que ser o toEqual
-      expect(res.body.message).toEqual([
-        'name should not be empty',
-        'name must be a string',
-      ])
-    })
-
-    it('should return error with 422 code when the name field is invalid', async () => {
-      delete signupDto.email
-      const res = await request(app.getHttpServer())
-        .post('/users')
-        .send(signupDto)
+        .post('/users/login')
+        .send(signinDto)
         .expect(422)
 
       expect(res.body.error).toBe('Unprocessable Entity')
@@ -112,10 +99,10 @@ describe('UsersController e2e tests', () => {
     })
 
     it('should return error with 422 code when the password field is invalid', async () => {
-      delete signupDto.password
+      delete signinDto.password
       const res = await request(app.getHttpServer())
-        .post('/users')
-        .send(signupDto)
+        .post('/users/login')
+        .send(signinDto)
         .expect(422)
 
       expect(res.body.error).toBe('Unprocessable Entity')
@@ -126,28 +113,16 @@ describe('UsersController e2e tests', () => {
       ])
     })
 
-    it('should return error with 422 code with invalid field provided', async () => {
+    it('should return error with 404 code when email not found', async () => {
       const res = await request(app.getHttpServer())
-        .post('/users')
-        .send(Object.assign(signupDto, { xpto: 'fake' }))
-        .expect(422)
-      expect(res.body.error).toBe('Unprocessable Entity')
+        .post('/users/login')
+        .send({ email: 'b@b.com', password: 'fake' })
+        .expect(404)
+      expect(res.body.error).toBe('Not Found')
       // Para comparar array e objetos tem que ser o toEqual
-      expect(res.body.message).toEqual(['property xpto should not exist'])
-    })
-
-    it('should return error with 409 code when the email is duplicated', async () => {
-      const entity = new UserEntity(UserDataBuilder({ ...signupDto }))
-      await repository.insert(entity)
-      const res = await request(app.getHttpServer())
-        .post('/users')
-        .send(signupDto)
-        .expect(409)
-        .expect({
-          status: 409,
-          error: 'Conflict',
-          message: 'Email address already used',
-        })
+      expect(res.body.message).toEqual(
+        'UserModel not found using email b@b.com',
+      )
     })
   })
 })
