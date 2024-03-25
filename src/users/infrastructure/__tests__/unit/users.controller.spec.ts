@@ -14,6 +14,7 @@ import {
   UserCollectionPresenter,
   UserPresenter,
 } from '../../presenters/user.presenter'
+import { generate } from 'rxjs'
 
 describe('UsersController unit tests', () => {
   let sut: UsersController
@@ -53,18 +54,21 @@ describe('UsersController unit tests', () => {
   })
 
   it('should authenticate user', async () => {
-    const output: SigninUseCase.Output = props
+    const output = 'fake_token'
     const mockSigninUseCase = {
       execute: jest.fn().mockReturnValue(Promise.resolve(output)),
     }
+    const mockAuthService = {
+      generateJwt: jest.fn().mockReturnValue(Promise.resolve(output)),
+    }
     sut['signinUseCase'] = mockSigninUseCase as any
+    sut['authService'] = mockAuthService as any
     const input: SigninDto = {
       email: 'a@a.com',
       password: '1234',
     }
-    const presenter = await sut.login(input)
-    expect(presenter).toBeInstanceOf(UserPresenter)
-    expect(presenter).toStrictEqual(new UserPresenter(output))
+    const result = await sut.login(input)
+    expect(result).toEqual(output)
     expect(mockSigninUseCase.execute).toHaveBeenCalledWith(input)
   })
 
