@@ -37,7 +37,6 @@ describe('ClassValidatorFields integration tests', () => {
         'price must be a number conforming to the specified constraints',
       ],
     })
-    console.log(validator.errors)
   })
   it('should validate without errors', () => {
     const validator = new StubClassValidatorFields()
@@ -45,6 +44,5 @@ describe('ClassValidatorFields integration tests', () => {
     expect(validator.validatedData).toStrictEqual(
       new StubRules({ name: 'value', price: 10 }),
     )
-    console.log(validator.errors)
   })
 })
